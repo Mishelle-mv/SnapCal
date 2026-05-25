@@ -8,6 +8,7 @@ import com.example.snapcal.data.local.MealDao
 import com.example.snapcal.data.local.MealEntity
 import com.example.snapcal.data.local.SnapCalDatabase
 import com.example.snapcal.data.local.toEntity
+import com.example.snapcal.data.local.toMeal
 import com.example.snapcal.data.model.Meal
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -72,6 +73,44 @@ class MealRepository(private val context: Context) {
         }
     }
 
+    suspend fun getMealById(mealId: String): Result<Meal> = withContext(Dispatchers.IO) {
+        val authResult = requireLoggedInUser()
+        if (authResult.isFailure) {
+            return@withContext Result.failure(authResult.exceptionOrNull()!!)
+        }
+        val userId = authResult.getOrNull()!!
+        try {
+            val dao = getMealDao()
+            val cached = dao.getById(mealId)?.toMeal()
+            if (cached != null) {
+                return@withContext if (cached.userId == userId) {
+                    Result.success(cached)
+                } else {
+                    Result.failure(UnauthorizedMealException())
+                }
+            }
+            if (FirebaseApp.getApps(context).isEmpty()) {
+                return@withContext Result.failure(FirebaseNotConfiguredException())
+            }
+            val firestore = FirebaseFirestore.getInstance()
+            val document = firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+                .document(mealId)
+                .get()
+                .await()
+            if (!document.exists()) {
+                return@withContext Result.failure(MealNotFoundException())
+            }
+            val meal = documentToMeal(document) ?: return@withContext Result.failure(MealNotFoundException())
+            if (meal.userId != userId) {
+                return@withContext Result.failure(UnauthorizedMealException())
+            }
+            dao.insert(meal.toEntity())
+            Result.success(meal)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun addMeal(description: String, calories: Int, imageUri: Uri): Result<Meal> {
         if (FirebaseApp.getApps(context).isEmpty()) {
             return Result.failure(FirebaseNotConfiguredException())
@@ -107,14 +146,7 @@ class MealRepository(private val context: Context) {
                 createdAt = createdAt
             )
 
-            val mealData = hashMapOf(
-                "userId" to meal.userId,
-                "userDisplayName" to meal.userDisplayName,
-                "description" to meal.description,
-                "calories" to meal.calories,
-                "imageUrl" to meal.imageUrl,
-                "createdAt" to meal.createdAt
-            )
+            val mealData = mealToMap(meal)
             firestore.collection(FirebaseConstants.MEALS_COLLECTION)
                 .document(mealId)
                 .set(mealData)
@@ -125,6 +157,126 @@ class MealRepository(private val context: Context) {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun updateMeal(
+        mealId: String,
+        description: String,
+        calories: Int,
+        newImageUri: Uri?
+    ): Result<Meal> = withContext(Dispatchers.IO) {
+        val authResult = requireLoggedInUser()
+        if (authResult.isFailure) {
+            return@withContext Result.failure(authResult.exceptionOrNull()!!)
+        }
+        val userId = authResult.getOrNull()!!
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            return@withContext Result.failure(FirebaseNotConfiguredException())
+        }
+        try {
+            val existing = loadOwnedMeal(mealId, userId)
+                ?: return@withContext Result.failure(MealNotFoundException())
+            val firestore = FirebaseFirestore.getInstance()
+            val storage = FirebaseStorage.getInstance()
+            var imageUrl = existing.imageUrl
+            if (newImageUri != null) {
+                val storageRef = storage.reference
+                    .child("meal_images")
+                    .child(userId)
+                    .child("$mealId.jpg")
+                storageRef.putFile(newImageUri).await()
+                imageUrl = storageRef.downloadUrl.await().toString()
+            }
+            val updatedMeal = existing.copy(
+                description = description.trim(),
+                calories = calories,
+                imageUrl = imageUrl
+            )
+            firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+                .document(mealId)
+                .set(mealToMap(updatedMeal))
+                .await()
+            getMealDao().insert(updatedMeal.toEntity())
+            Result.success(updatedMeal)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteMeal(mealId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        val authResult = requireLoggedInUser()
+        if (authResult.isFailure) {
+            return@withContext Result.failure(authResult.exceptionOrNull()!!)
+        }
+        val userId = authResult.getOrNull()!!
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            return@withContext Result.failure(FirebaseNotConfiguredException())
+        }
+        try {
+            val existing = loadOwnedMeal(mealId, userId)
+                ?: return@withContext Result.failure(MealNotFoundException())
+            val firestore = FirebaseFirestore.getInstance()
+            val storage = FirebaseStorage.getInstance()
+            firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+                .document(mealId)
+                .delete()
+                .await()
+            try {
+                storage.reference
+                    .child("meal_images")
+                    .child(userId)
+                    .child("$mealId.jpg")
+                    .delete()
+                    .await()
+            } catch (_: Exception) {
+            }
+            getMealDao().deleteById(mealId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun loadOwnedMeal(mealId: String, userId: String): Meal? {
+        val dao = getMealDao()
+        val cached = dao.getById(mealId)?.toMeal()
+        if (cached != null) {
+            return if (cached.userId == userId) cached else null
+        }
+        val firestore = FirebaseFirestore.getInstance()
+        val document = firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+            .document(mealId)
+            .get()
+            .await()
+        if (!document.exists()) {
+            return null
+        }
+        val meal = documentToMeal(document) ?: return null
+        if (meal.userId != userId) {
+            return null
+        }
+        dao.insert(meal.toEntity())
+        return meal
+    }
+
+    private fun requireLoggedInUser(): Result<String> {
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            return Result.failure(FirebaseNotConfiguredException())
+        }
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: return Result.failure(NotLoggedInException())
+        return Result.success(userId)
+    }
+
+    private fun mealToMap(meal: Meal): HashMap<String, Any> {
+        return hashMapOf(
+            "userId" to meal.userId,
+            "userDisplayName" to meal.userDisplayName,
+            "description" to meal.description,
+            "calories" to meal.calories,
+            "imageUrl" to meal.imageUrl,
+            "createdAt" to meal.createdAt
+        )
     }
 
     private fun documentToMeal(document: DocumentSnapshot): Meal? {
@@ -154,4 +306,8 @@ class MealRepository(private val context: Context) {
     class NotLoggedInException : Exception("not_logged_in")
 
     class FirebaseNotConfiguredException : Exception("firebase_not_configured")
+
+    class MealNotFoundException : Exception("meal_not_found")
+
+    class UnauthorizedMealException : Exception("unauthorized_meal")
 }
