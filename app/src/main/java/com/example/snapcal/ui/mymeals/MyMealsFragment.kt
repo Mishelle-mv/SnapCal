@@ -12,12 +12,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.snapcal.R
+import com.example.snapcal.ui.mealform.MealFormViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MyMealsFragment : Fragment() {
 
     private val viewModel: MyMealsViewModel by viewModels()
-    private val adapter = MyMealAdapter()
+    private lateinit var adapter: MyMealAdapter
 
     private lateinit var recyclerMyMeals: RecyclerView
     private lateinit var tvEmptyState: TextView
@@ -39,11 +40,23 @@ class MyMealsFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         fabMealForm = view.findViewById(R.id.fabMealForm)
 
+        adapter = MyMealAdapter { meal ->
+            val action = MyMealsFragmentDirections.actionMyMealsFragmentToMealFormFragment(
+                mode = MealFormViewModel.MODE_EDIT,
+                mealId = meal.id
+            )
+            findNavController().navigate(action)
+        }
+
         recyclerMyMeals.layoutManager = LinearLayoutManager(requireContext())
         recyclerMyMeals.adapter = adapter
 
         fabMealForm.setOnClickListener {
-            findNavController().navigate(R.id.action_myMealsFragment_to_mealFormFragment)
+            val action = MyMealsFragmentDirections.actionMyMealsFragmentToMealFormFragment(
+                mode = MealFormViewModel.MODE_ADD,
+                mealId = null
+            )
+            findNavController().navigate(action)
         }
 
         viewModel.meals.observe(viewLifecycleOwner) { meals ->

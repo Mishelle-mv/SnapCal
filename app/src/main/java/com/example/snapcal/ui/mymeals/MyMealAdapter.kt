@@ -12,24 +12,37 @@ import com.example.snapcal.R
 import com.example.snapcal.data.model.Meal
 import com.squareup.picasso.Picasso
 
-class MyMealAdapter : ListAdapter<Meal, MyMealAdapter.MealViewHolder>(MealDiffCallback()) {
+class MyMealAdapter(
+    private val onMealClick: (Meal) -> Unit
+) : ListAdapter<Meal, MyMealAdapter.MealViewHolder>(MealDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_my_meal, parent, false)
-        return MealViewHolder(view)
+        return MealViewHolder(view, onMealClick)
     }
 
     override fun onBindViewHolder(holder: MealViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class MealViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MealViewHolder(
+        itemView: View,
+        private val onMealClick: (Meal) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
         private val imageMeal: ImageView = itemView.findViewById(R.id.imageMeal)
         private val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
         private val tvCalories: TextView = itemView.findViewById(R.id.tvCalories)
+        private var currentMeal: Meal? = null
+
+        init {
+            itemView.setOnClickListener {
+                currentMeal?.let(onMealClick)
+            }
+        }
 
         fun bind(meal: Meal) {
+            currentMeal = meal
             tvDescription.text = meal.description
             tvCalories.text = itemView.context.getString(R.string.calories_value, meal.calories)
             if (meal.imageUrl.isNotBlank()) {

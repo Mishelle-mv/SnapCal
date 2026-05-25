@@ -24,4 +24,9 @@
     <string name="my_meals_not_logged_in">Sign in to see your meals.</string>
     <string name="my_meals_firebase_not_configured">Meals will appear here after Authentication is set up.</string>
     <string name="error_load_meals_failed">Failed to load meals. Please try again.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_meal_title">Delete meal</string>
+    <string name="delete_meal_message">Are you sure you want to delete this meal?</string>
+    <string name="error_meal_not_found">Meal not found</string>
+    <string name="error_unauthorized_meal">You can only edit your own meals</string>
 </resources>

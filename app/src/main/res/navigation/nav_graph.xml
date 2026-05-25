@@ -41,7 +41,17 @@
         <fragment
             android:id="@+id/mealFormFragment"
             android:name="com.example.snapcal.ui.mealform.MealFormFragment"
-            android:label="@string/meal_form_screen" />
+            android:label="@string/meal_form_screen">
+            <argument
+                android:name="mode"
+                android:defaultValue="add"
+                app:argType="string" />
+            <argument
+                android:name="mealId"
+                android:defaultValue="@null"
+                app:argType="string"
+                app:nullable="true" />
+        </fragment>
     </navigation>
 
     <fragment
