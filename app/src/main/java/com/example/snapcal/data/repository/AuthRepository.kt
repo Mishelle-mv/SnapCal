@@ -23,4 +23,10 @@ class AuthRepository {
     fun logout() {
         auth.signOut()
     }
+
+    suspend fun googleSignIn(idToken: String): FirebaseUser? {
+        val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+        val result = auth.signInWithCredential(credential).await()
+        return result.user
+    }
 }

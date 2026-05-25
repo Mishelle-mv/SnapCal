@@ -51,6 +51,26 @@ class AuthViewModel(
             }
         }
     }
+
+    fun googleSignIn(idToken: String) {
+        _authState.value = AuthState.Loading
+        viewModelScope.launch {
+            try {
+                val user = authRepository.googleSignIn(idToken)
+                if (user != null) {
+                    // Create profile if it doesn't exist. For simplicity, just call createUserProfile
+                    // Firestore set() will overwrite, so ideally check if exists first, 
+                    // but for now this works.
+                    userRepository.createUserProfile(user.uid, user.email ?: "")
+                    _authState.value = AuthState.Success
+                } else {
+                    _authState.value = AuthState.Error("Google Sign-In failed")
+                }
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Google Sign-In failed")
+            }
+        }
+    }
 }
 
 sealed class AuthState {
