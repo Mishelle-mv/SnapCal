@@ -5,7 +5,7 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/nav_explore" />
     <item
-        android:id="@+id/myMealsFragment"
+        android:id="@+id/myMealsNavGraph"
         android:icon="@android:drawable/ic_menu_agenda"
         android:title="@string/nav_my_meals" />
     <item

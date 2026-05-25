@@ -8,4 +8,20 @@
     <string name="my_meals_screen">My Meals</string>
     <string name="profile_screen">Profile</string>
     <string name="meal_form_screen">Meal Form</string>
+    <string name="select_photo">Select photo</string>
+    <string name="meal_photo_preview">Meal photo preview</string>
+    <string name="description_hint">Description</string>
+    <string name="calories_hint">Calories</string>
+    <string name="save">Save</string>
+    <string name="error_not_logged_in">You must be logged in to save a meal</string>
+    <string name="error_firebase_not_configured">Firebase is not configured yet. Saving will work after Authentication is set up.</string>
+    <string name="error_description_required">Description is required</string>
+    <string name="error_calories_invalid">Enter a valid calorie amount greater than 0</string>
+    <string name="error_image_required">Please select a photo</string>
+    <string name="error_save_failed">Failed to save meal. Please try again.</string>
+    <string name="calories_value">%1$d cal</string>
+    <string name="my_meals_empty">No meals yet. Tap + to add your first meal.</string>
+    <string name="my_meals_not_logged_in">Sign in to see your meals.</string>
+    <string name="my_meals_firebase_not_configured">Meals will appear here after Authentication is set up.</string>
+    <string name="error_load_meals_failed">Failed to load meals. Please try again.</string>
 </resources>
