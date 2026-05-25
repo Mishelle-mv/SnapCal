@@ -2,22 +2,77 @@ package com.example.snapcal.data.repository
 
 import android.content.Context
 import android.net.Uri
+import androidx.lifecycle.LiveData
 import com.example.snapcal.data.FirebaseConstants
+import com.example.snapcal.data.local.MealDao
+import com.example.snapcal.data.local.MealEntity
 import com.example.snapcal.data.local.SnapCalDatabase
 import com.example.snapcal.data.local.toEntity
 import com.example.snapcal.data.model.Meal
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import androidx.lifecycle.map
 import com.example.snapcal.data.local.toMeal
 
 class MealRepository(private val context: Context) {
 
-    private val mealDao = SnapCalDatabase.getInstance(context).mealDao()
+    @Volatile
+    private var mealDao: MealDao? = null
+
+    private suspend fun getMealDao(): MealDao = withContext(Dispatchers.IO) {
+        mealDao ?: SnapCalDatabase.getInstance(context.applicationContext)
+            .mealDao()
+            .also { mealDao = it }
+    }
+
+    fun getAuthStatus(): AuthStatus {
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            return AuthStatus.FirebaseNotConfigured
+        }
+        val user = FirebaseAuth.getInstance().currentUser
+        return if (user != null) {
+            AuthStatus.LoggedIn(user.uid)
+        } else {
+            AuthStatus.NotLoggedIn
+        }
+    }
+
+    suspend fun observeMealsByUserId(userId: String): LiveData<List<MealEntity>> {
+        return getMealDao().getByUserId(userId)
+    }
+
+    suspend fun refreshMealsForUser(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            return@withContext Result.failure(FirebaseNotConfiguredException())
+        }
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser?.uid != userId) {
+            return@withContext Result.failure(NotLoggedInException())
+        }
+        try {
+            val firestore = FirebaseFirestore.getInstance()
+            val snapshot = firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            val meals = snapshot.documents.mapNotNull { documentToMeal(it) }
+            val dao = getMealDao()
+            dao.deleteByUserId(userId)
+            if (meals.isNotEmpty()) {
+                dao.insertAll(meals.map { it.toEntity() })
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     suspend fun addMeal(description: String, calories: Int, imageUri: Uri): Result<Meal> {
         if (FirebaseApp.getApps(context).isEmpty()) {
@@ -67,7 +122,7 @@ class MealRepository(private val context: Context) {
                 .set(mealData)
                 .await()
 
-            mealDao.insert(meal.toEntity())
+            getMealDao().insert(meal.toEntity())
             Result.success(meal)
         } catch (e: Exception) {
             Result.failure(e)
@@ -75,7 +130,8 @@ class MealRepository(private val context: Context) {
     }
 
     fun getFeedMeals(): androidx.lifecycle.LiveData<List<Meal>> {
-        return mealDao.getAll().map { entities ->
+        val dao = SnapCalDatabase.getInstance(context.applicationContext).mealDao()
+        return dao.getAll().map { entities ->
             entities.map { it.toMeal() }
         }
     }
@@ -89,28 +145,35 @@ class MealRepository(private val context: Context) {
                 .get()
                 .await()
             
-            val remoteMeals = result.documents.mapNotNull { doc ->
-                val userId = doc.getString("userId") ?: return@mapNotNull null
-                val description = doc.getString("description") ?: ""
-                val calories = doc.getLong("calories")?.toInt() ?: 0
-                val imageUrl = doc.getString("imageUrl") ?: ""
-                val createdAt = doc.getLong("createdAt") ?: 0L
-                val userDisplayName = doc.getString("userDisplayName") ?: "User"
-
-                Meal(
-                    id = doc.id,
-                    userId = userId,
-                    userDisplayName = userDisplayName,
-                    description = description,
-                    calories = calories,
-                    imageUrl = imageUrl,
-                    createdAt = createdAt
-                )
-            }
-            mealDao.insertAll(remoteMeals.map { it.toEntity() })
+            val remoteMeals = result.documents.mapNotNull { documentToMeal(it) }
+            getMealDao().insertAll(remoteMeals.map { it.toEntity() })
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun documentToMeal(document: DocumentSnapshot): Meal? {
+        val userId = document.getString("userId") ?: return null
+        val description = document.getString("description") ?: return null
+        val imageUrl = document.getString("imageUrl") ?: return null
+        val userDisplayName = document.getString("userDisplayName") ?: ""
+        val calories = document.getLong("calories")?.toInt() ?: return null
+        val createdAt = document.getLong("createdAt") ?: return null
+        return Meal(
+            id = document.id,
+            userId = userId,
+            userDisplayName = userDisplayName,
+            description = description,
+            calories = calories,
+            imageUrl = imageUrl,
+            createdAt = createdAt
+        )
+    }
+
+    sealed class AuthStatus {
+        data object FirebaseNotConfigured : AuthStatus()
+        data object NotLoggedIn : AuthStatus()
+        data class LoggedIn(val userId: String) : AuthStatus()
     }
 
     class NotLoggedInException : Exception("not_logged_in")
