@@ -3,6 +3,7 @@ package com.example.snapcal.data.repository
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import com.example.snapcal.data.FirebaseConstants
 import com.example.snapcal.data.local.MealDao
 import com.example.snapcal.data.local.MealEntity
@@ -14,6 +15,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -234,6 +236,29 @@ class MealRepository(private val context: Context) {
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    fun getFeedMeals(): LiveData<List<Meal>> {
+        val dao = SnapCalDatabase.getInstance(context.applicationContext).mealDao()
+        return dao.getAll().map { entities ->
+            entities.map { it.toMeal() }
+        }
+    }
+
+    suspend fun fetchMealsFromRemote() {
+        if (FirebaseApp.getApps(context).isEmpty()) return
+        val firestore = FirebaseFirestore.getInstance()
+        try {
+            val result = firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            val remoteMeals = result.documents.mapNotNull { documentToMeal(it) }
+            getMealDao().insertAll(remoteMeals.map { it.toEntity() })
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
