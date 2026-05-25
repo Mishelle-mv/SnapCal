@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/exploreFragment">
+
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="com.example.snapcal.ui.auth.AuthFragment"
+        android:label="@string/auth_screen" />
+
+    <fragment
+        android:id="@+id/exploreFragment"
+        android:name="com.example.snapcal.ui.explore.ExploreFragment"
+        android:label="@string/explore_screen" />
+
+    <fragment
+        android:id="@+id/myMealsFragment"
+        android:name="com.example.snapcal.ui.mymeals.MyMealsFragment"
+        android:label="@string/my_meals_screen">
+        <action
+            android:id="@+id/action_myMealsFragment_to_mealFormFragment"
+            app:destination="@id/mealFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.snapcal.ui.profile.ProfileFragment"
+        android:label="@string/profile_screen" />
+
+    <fragment
+        android:id="@+id/mealFormFragment"
+        android:name="com.example.snapcal.ui.mealform.MealFormFragment"
+        android:label="@string/meal_form_screen" />
+
+</navigation>

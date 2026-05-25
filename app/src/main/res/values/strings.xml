@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SnapCal</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_my_meals">My Meals</string>
+    <string name="nav_profile">Profile</string>
+    <string name="auth_screen">Auth</string>
+    <string name="explore_screen">Explore</string>
+    <string name="my_meals_screen">My Meals</string>
+    <string name="profile_screen">Profile</string>
+    <string name="meal_form_screen">Meal Form</string>
 </resources>
