@@ -72,6 +72,45 @@ class MealRepository(private val context: Context) {
         }
     }
 
+    fun getFeedMeals(): androidx.lifecycle.LiveData<List<Meal>> {
+        return androidx.lifecycle.Transformations.map(mealDao.getAll()) { entities ->
+            entities.map { it.toMeal() }
+        }
+    }
+
+    suspend fun fetchMealsFromRemote() {
+        if (FirebaseApp.getApps(context).isEmpty()) return
+        val firestore = FirebaseFirestore.getInstance()
+        try {
+            val result = firestore.collection(FirebaseConstants.MEALS_COLLECTION)
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val remoteMeals = result.documents.mapNotNull { doc ->
+                val userId = doc.getString("userId") ?: return@mapNotNull null
+                val description = doc.getString("description") ?: ""
+                val calories = doc.getLong("calories")?.toInt() ?: 0
+                val imageUrl = doc.getString("imageUrl") ?: ""
+                val createdAt = doc.getLong("createdAt") ?: 0L
+                val userDisplayName = doc.getString("userDisplayName") ?: "User"
+
+                Meal(
+                    id = doc.id,
+                    userId = userId,
+                    userDisplayName = userDisplayName,
+                    description = description,
+                    calories = calories,
+                    imageUrl = imageUrl,
+                    createdAt = createdAt
+                )
+            }
+            mealDao.insertAll(remoteMeals.map { it.toEntity() })
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     class NotLoggedInException : Exception("not_logged_in")
 
     class FirebaseNotConfiguredException : Exception("firebase_not_configured")

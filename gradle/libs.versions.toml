@@ -41,6 +41,7 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version = "4.16.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
