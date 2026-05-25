@@ -8,8 +8,8 @@ import kotlinx.coroutines.tasks.await
 class UserRepository {
     private val firestore = FirebaseFirestore.getInstance()
 
-    suspend fun createUserProfile(userId: String, email: String) {
-        val name = email.substringBefore("@")
+    suspend fun createUserProfile(userId: String, email: String, displayName: String? = null) {
+        val name = displayName?.takeIf { it.isNotBlank() } ?: email.substringBefore("@")
         val profile = UserProfile(
             userId = userId,
             displayName = name,
@@ -19,6 +19,15 @@ class UserRepository {
             .document(userId)
             .set(profile)
             .await()
+        
+        // Also update Firebase Auth profile so it's instantly available
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (user != null && user.uid == userId) {
+            val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
+                this.displayName = name
+            }
+            user.updateProfile(profileUpdates).await()
+        }
     }
 
     suspend fun getUserProfile(userId: String): UserProfile? {

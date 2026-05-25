@@ -78,11 +78,12 @@ class RegisterFragment : Fragment() {
         }
 
         binding.btnRegister.setOnClickListener {
+            val displayName = binding.etDisplayName.text.toString()
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
             val confirmPassword = binding.etConfirmPassword.text.toString()
 
-            if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+            if (displayName.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                 Toast.makeText(requireContext(), "Fill all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -92,7 +93,7 @@ class RegisterFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            viewModel.register(email, password)
+            viewModel.register(email, password, displayName)
         }
 
         binding.btnLogin.setOnClickListener {

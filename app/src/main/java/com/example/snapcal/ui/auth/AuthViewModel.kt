@@ -35,13 +35,13 @@ class AuthViewModel(
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(email: String, password: String, displayName: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             try {
                 val user = authRepository.register(email, password)
                 if (user != null) {
-                    userRepository.createUserProfile(user.uid, email)
+                    userRepository.createUserProfile(user.uid, email, displayName)
                     _authState.value = AuthState.Success
                 } else {
                     _authState.value = AuthState.Error("Registration failed")
