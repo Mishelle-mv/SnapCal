@@ -20,8 +20,8 @@ class ExploreFragment : Fragment() {
         ExploreViewModelFactory(MealRepository(requireContext()))
     }
 
-    private lateinit val mealAdapter: MealAdapter
-    private lateinit val nutritionAdapter: NutritionAdapter
+    private lateinit var mealAdapter: MealAdapter
+    private lateinit var nutritionAdapter: NutritionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,

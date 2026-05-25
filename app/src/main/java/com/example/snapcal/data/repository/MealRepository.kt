@@ -12,6 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
+import androidx.lifecycle.map
+import com.example.snapcal.data.local.toMeal
 
 class MealRepository(private val context: Context) {
 
@@ -73,7 +75,7 @@ class MealRepository(private val context: Context) {
     }
 
     fun getFeedMeals(): androidx.lifecycle.LiveData<List<Meal>> {
-        return androidx.lifecycle.Transformations.map(mealDao.getAll()) { entities ->
+        return mealDao.getAll().map { entities ->
             entities.map { it.toMeal() }
         }
     }
