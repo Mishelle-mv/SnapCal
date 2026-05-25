@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         val topLevelDestinations = setOf(
             R.id.exploreFragment,
+            R.id.myMealsNavGraph,
             R.id.myMealsFragment,
             R.id.profileFragment
         )
