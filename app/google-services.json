@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "214980709835",
+    "project_id": "snapcal-415c7",
+    "storage_bucket": "snapcal-415c7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214980709835:android:965cc35e5ff32946c1fa4e",
+        "android_client_info": {
+          "package_name": "com.example.snapcal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "214980709835-3bmn7hiuprvdr5p30dmf4l3rt2l4qe8c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_nEtMLiXHvGQLc3URnwxivTTadthh1bI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214980709835-3bmn7hiuprvdr5p30dmf4l3rt2l4qe8c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
