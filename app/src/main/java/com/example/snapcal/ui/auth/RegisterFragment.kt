@@ -56,6 +56,11 @@ class RegisterFragment : Fragment() {
 
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
+                is AuthState.Idle -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnRegister.isEnabled = true
+                    binding.btnLogin.isEnabled = true
+                }
                 is AuthState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
                     binding.btnRegister.isEnabled = false
