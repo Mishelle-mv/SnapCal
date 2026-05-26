@@ -64,4 +64,9 @@
         android:name="com.example.snapcal.ui.profile.ProfileFragment"
         android:label="@string/profile_screen" />
 
+    <fragment
+        android:id="@+id/recipeSearchFragment"
+        android:name="com.example.snapcal.ui.recipes.RecipeSearchFragment"
+        android:label="@string/nav_recipes" />
+
 </navigation>

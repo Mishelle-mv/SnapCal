@@ -9,6 +9,10 @@
         android:icon="@android:drawable/ic_menu_agenda"
         android:title="@string/nav_my_meals" />
     <item
+        android:id="@+id/recipeSearchFragment"
+        android:icon="@drawable/ic_food"
+        android:title="@string/nav_recipes" />
+    <item
         android:id="@+id/profileFragment"
         android:icon="@android:drawable/ic_menu_myplaces"
         android:title="@string/nav_profile" />
