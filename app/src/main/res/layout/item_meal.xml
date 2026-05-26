@@ -14,11 +14,13 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivUserAvatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/circle_bg"
+            android:background="?attr/colorSecondaryContainer"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

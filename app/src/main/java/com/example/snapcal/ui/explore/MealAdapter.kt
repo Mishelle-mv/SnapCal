@@ -31,6 +31,7 @@ class MealAdapter : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallba
                     .load(meal.userProfilePictureUrl)
                     .placeholder(com.example.snapcal.R.drawable.ic_person)
                     .error(com.example.snapcal.R.drawable.ic_person)
+                    .circleCrop()
                     .into(binding.ivUserAvatar)
             } else {
                 binding.ivUserAvatar.setImageResource(com.example.snapcal.R.drawable.ic_person)
