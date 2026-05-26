@@ -29,4 +29,9 @@
     <string name="delete_meal_message">Are you sure you want to delete this meal?</string>
     <string name="error_meal_not_found">Meal not found</string>
     <string name="error_unauthorized_meal">You can only edit your own meals</string>
+    <string name="nav_recipes">Recipes</string>
+    <string name="search_recipes_hint">Search recipes... (e.g. Chicken)</string>
+    <string name="no_recipes_found">No recipes found for \'%1$s\'</string>
+    <string name="search_recipes_empty">Search for your favorite recipes!</string>
+    <string name="error_load_recipes_failed">Failed to load recipes. Please try again.</string>
 </resources>

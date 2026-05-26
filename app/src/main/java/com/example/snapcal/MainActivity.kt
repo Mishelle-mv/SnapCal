@@ -22,7 +22,8 @@ class MainActivity : AppCompatActivity() {
             R.id.exploreFragment,
             R.id.myMealsNavGraph,
             R.id.myMealsFragment,
-            R.id.profileFragment
+            R.id.profileFragment,
+            R.id.recipeSearchFragment
         )
 
         navController.addOnDestinationChangedListener { _, destination, _ ->

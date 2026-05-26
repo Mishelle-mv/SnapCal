@@ -13,4 +13,12 @@ object RetrofitClient {
             .build()
             .create(OpenFoodFactsApi::class.java)
     }
+
+    val theMealDbApi: TheMealDbApi by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://www.themealdb.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(TheMealDbApi::class.java)
+    }
 }
