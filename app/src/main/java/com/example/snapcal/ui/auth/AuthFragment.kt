@@ -20,7 +20,7 @@ class AuthFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AuthViewModel by viewModels {
-        AuthViewModelFactory(AuthRepository(), UserRepository())
+        AuthViewModelFactory(AuthRepository(), UserRepository(requireContext()))
     }
 
     private val googleSignInLauncher = registerForActivityResult(

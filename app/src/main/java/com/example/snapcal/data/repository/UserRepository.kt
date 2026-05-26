@@ -1,13 +1,19 @@
 package com.example.snapcal.data.repository
 
+import android.content.Context
 import com.example.snapcal.data.FirebaseConstants
 import com.example.snapcal.data.model.UserProfile
+import com.example.snapcal.util.ImageCompressor
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
-class UserRepository {
+class UserRepository(private val context: Context) {
     private val firestore = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
 
     suspend fun createUserProfile(userId: String, email: String, displayName: String? = null) {
         val name = displayName?.takeIf { it.isNotBlank() } ?: email.substringBefore("@")
@@ -76,12 +82,13 @@ class UserRepository {
         }
     }
 
-    suspend fun uploadProfilePicture(userId: String, imageUri: android.net.Uri): String {
-        val storageRef = com.google.firebase.storage.FirebaseStorage.getInstance().reference
+    suspend fun uploadProfilePicture(userId: String, imageUri: android.net.Uri): String = withContext(Dispatchers.IO) {
+        val storageRef = storage.reference
             .child("profile_images")
             .child("$userId.jpg")
 
-        storageRef.putFile(imageUri).await()
+        val compressedUri = ImageCompressor.compressImage(context, imageUri)
+        storageRef.putFile(compressedUri).await()
         val downloadUrl = storageRef.downloadUrl.await().toString()
 
         firestore.collection(FirebaseConstants.USERS_COLLECTION)
@@ -97,6 +104,6 @@ class UserRepository {
             user.updateProfile(profileUpdates).await()
         }
 
-        return downloadUrl
+        downloadUrl
     }
 }

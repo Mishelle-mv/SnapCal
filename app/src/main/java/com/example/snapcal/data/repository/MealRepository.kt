@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import com.example.snapcal.util.ImageCompressor
 
 class MealRepository(private val context: Context) {
 
@@ -135,7 +136,8 @@ class MealRepository(private val context: Context) {
                 .child("meal_images")
                 .child(userId)
                 .child("$mealId.jpg")
-            storageRef.putFile(imageUri).await()
+            val compressedUri = ImageCompressor.compressImage(context, imageUri)
+            storageRef.putFile(compressedUri).await()
             val imageUrl = storageRef.downloadUrl.await().toString()
 
             val meal = Meal(
@@ -186,7 +188,8 @@ class MealRepository(private val context: Context) {
                     .child("meal_images")
                     .child(userId)
                     .child("$mealId.jpg")
-                storageRef.putFile(newImageUri).await()
+                val compressedUri = ImageCompressor.compressImage(context, newImageUri)
+                storageRef.putFile(compressedUri).await()
                 imageUrl = storageRef.downloadUrl.await().toString()
             }
             val updatedMeal = existing.copy(
