@@ -21,9 +21,10 @@ class MyMealsFragment : Fragment() {
     private lateinit var adapter: MyMealAdapter
 
     private lateinit var recyclerMyMeals: RecyclerView
+    private lateinit var emptyStateLayout: View
     private lateinit var tvEmptyState: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var fabMealForm: FloatingActionButton
+    private lateinit var fabMealForm: com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,6 +37,7 @@ class MyMealsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         recyclerMyMeals = view.findViewById(R.id.recyclerMyMeals)
+        emptyStateLayout = view.findViewById(R.id.emptyStateLayout)
         tvEmptyState = view.findViewById(R.id.tvEmptyState)
         progressBar = view.findViewById(R.id.progressBar)
         fabMealForm = view.findViewById(R.id.fabMealForm)
@@ -78,35 +80,35 @@ class MyMealsFragment : Fragment() {
             MyMealsScreenState.Loading -> {
                 progressBar.visibility = View.VISIBLE
                 recyclerMyMeals.visibility = View.GONE
-                tvEmptyState.visibility = View.GONE
+                emptyStateLayout.visibility = View.GONE
             }
             MyMealsScreenState.FirebaseNotConfigured -> {
                 progressBar.visibility = View.GONE
                 recyclerMyMeals.visibility = View.GONE
-                tvEmptyState.visibility = View.VISIBLE
+                emptyStateLayout.visibility = View.VISIBLE
                 tvEmptyState.setText(R.string.my_meals_firebase_not_configured)
             }
             MyMealsScreenState.NotLoggedIn -> {
                 progressBar.visibility = View.GONE
                 recyclerMyMeals.visibility = View.GONE
-                tvEmptyState.visibility = View.VISIBLE
+                emptyStateLayout.visibility = View.VISIBLE
                 tvEmptyState.setText(R.string.my_meals_not_logged_in)
             }
             is MyMealsScreenState.Ready -> {
                 progressBar.visibility = View.GONE
                 if (state.isEmpty) {
                     recyclerMyMeals.visibility = View.GONE
-                    tvEmptyState.visibility = View.VISIBLE
+                    emptyStateLayout.visibility = View.VISIBLE
                     tvEmptyState.setText(R.string.my_meals_empty)
                 } else {
                     recyclerMyMeals.visibility = View.VISIBLE
-                    tvEmptyState.visibility = View.GONE
+                    emptyStateLayout.visibility = View.GONE
                 }
             }
             is MyMealsScreenState.Error -> {
                 progressBar.visibility = View.GONE
                 recyclerMyMeals.visibility = View.GONE
-                tvEmptyState.visibility = View.VISIBLE
+                emptyStateLayout.visibility = View.VISIBLE
                 tvEmptyState.text = state.message
             }
             null -> {

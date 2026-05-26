@@ -26,7 +26,16 @@ class MealAdapter : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallba
             binding.tvDescription.text = meal.description
             binding.tvCalories.text = "${meal.calories} kcal"
 
-            // Since we don't have user avatars yet, leave blank or load placeholder
+            if (meal.userProfilePictureUrl.isNotBlank()) {
+                Glide.with(binding.root)
+                    .load(meal.userProfilePictureUrl)
+                    .placeholder(com.example.snapcal.R.drawable.ic_person)
+                    .error(com.example.snapcal.R.drawable.ic_person)
+                    .circleCrop()
+                    .into(binding.ivUserAvatar)
+            } else {
+                binding.ivUserAvatar.setImageResource(com.example.snapcal.R.drawable.ic_person)
+            }
             
             Glide.with(binding.root)
                 .load(meal.imageUrl)

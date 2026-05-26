@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [MealEntity::class, UserProfileEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class SnapCalDatabase : RoomDatabase() {
@@ -24,7 +24,9 @@ abstract class SnapCalDatabase : RoomDatabase() {
                     context.applicationContext,
                     SnapCalDatabase::class.java,
                     "snapcal_database"
-                ).build().also { instance = it }
+                )
+                .fallbackToDestructiveMigration()
+                .build().also { instance = it }
             }
         }
     }
