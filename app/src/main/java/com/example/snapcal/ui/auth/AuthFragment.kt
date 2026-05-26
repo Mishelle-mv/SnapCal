@@ -20,7 +20,7 @@ class AuthFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AuthViewModel by viewModels {
-        AuthViewModelFactory(AuthRepository(), UserRepository())
+        AuthViewModelFactory(AuthRepository(), UserRepository(requireContext()))
     }
 
     private val googleSignInLauncher = registerForActivityResult(
@@ -52,6 +52,11 @@ class AuthFragment : Fragment() {
 
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
+                is AuthState.Idle -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnLogin.isEnabled = true
+                    binding.btnRegister.isEnabled = true
+                }
                 is AuthState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
                     binding.btnLogin.isEnabled = false

@@ -22,7 +22,7 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ProfileViewModel by viewModels {
-        ProfileViewModelFactory(AuthRepository(), UserRepository())
+        ProfileViewModelFactory(AuthRepository(), UserRepository(requireContext()))
     }
 
     private var selectedImageUri: Uri? = null
