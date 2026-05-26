@@ -128,6 +128,7 @@ class MealRepository(private val context: Context) {
         val displayName = user.displayName?.takeIf { it.isNotBlank() }
             ?: user.email?.takeIf { it.isNotBlank() }
             ?: "User"
+        val photoUrl = user.photoUrl?.toString() ?: ""
         val mealId = UUID.randomUUID().toString()
         val createdAt = System.currentTimeMillis()
 
@@ -144,6 +145,7 @@ class MealRepository(private val context: Context) {
                 id = mealId,
                 userId = userId,
                 userDisplayName = displayName,
+                userProfilePictureUrl = photoUrl,
                 description = description.trim(),
                 calories = calories,
                 imageUrl = imageUrl,
@@ -300,6 +302,7 @@ class MealRepository(private val context: Context) {
         return hashMapOf(
             "userId" to meal.userId,
             "userDisplayName" to meal.userDisplayName,
+            "userProfilePictureUrl" to meal.userProfilePictureUrl,
             "description" to meal.description,
             "calories" to meal.calories,
             "imageUrl" to meal.imageUrl,
@@ -312,12 +315,14 @@ class MealRepository(private val context: Context) {
         val description = document.getString("description") ?: return null
         val imageUrl = document.getString("imageUrl") ?: return null
         val userDisplayName = document.getString("userDisplayName") ?: ""
+        val userProfilePictureUrl = document.getString("userProfilePictureUrl") ?: ""
         val calories = document.getLong("calories")?.toInt() ?: return null
         val createdAt = document.getLong("createdAt") ?: return null
         return Meal(
             id = document.id,
             userId = userId,
             userDisplayName = userDisplayName,
+            userProfilePictureUrl = userProfilePictureUrl,
             description = description,
             calories = calories,
             imageUrl = imageUrl,

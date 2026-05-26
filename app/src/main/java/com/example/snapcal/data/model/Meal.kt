@@ -4,6 +4,7 @@ data class Meal(
     val id: String = "",
     val userId: String = "",
     val userDisplayName: String = "",
+    val userProfilePictureUrl: String = "",
     val description: String = "",
     val calories: Int = 0,
     val imageUrl: String = "",
