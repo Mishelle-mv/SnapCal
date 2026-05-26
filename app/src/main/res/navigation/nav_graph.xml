@@ -4,6 +4,11 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/authFragment">
 
+    <action android:id="@+id/action_global_authFragment"
+        app:destination="@id/authFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/authFragment"
         android:name="com.example.snapcal.ui.auth.AuthFragment"
