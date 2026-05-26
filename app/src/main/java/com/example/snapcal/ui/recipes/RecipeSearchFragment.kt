@@ -36,11 +36,38 @@ class RecipeSearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        recipeAdapter = RecipeAdapter()
+        recipeAdapter = RecipeAdapter { recipe ->
+            showRecipeDetailDialog(recipe)
+        }
         binding.rvRecipes.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = recipeAdapter
         }
+    }
+
+    private fun showRecipeDetailDialog(recipe: com.example.snapcal.data.model.Recipe) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(com.example.snapcal.R.layout.dialog_recipe_detail, null)
+        val ivImage = dialogView.findViewById<android.widget.ImageView>(com.example.snapcal.R.id.ivDetailImage)
+        val tvTitle = dialogView.findViewById<android.widget.TextView>(com.example.snapcal.R.id.tvDetailTitle)
+        val tvCategory = dialogView.findViewById<android.widget.TextView>(com.example.snapcal.R.id.tvDetailCategory)
+        val tvInstructions = dialogView.findViewById<android.widget.TextView>(com.example.snapcal.R.id.tvDetailInstructions)
+
+        tvTitle.text = recipe.title
+        tvCategory.text = buildString {
+            if (!recipe.category.isNullOrBlank()) append(recipe.category)
+            if (!recipe.category.isNullOrBlank() && !recipe.area.isNullOrBlank()) append(" | ")
+            if (!recipe.area.isNullOrBlank()) append(recipe.area)
+        }
+        tvInstructions.text = recipe.instructions
+
+        if (!recipe.imageUrl.isNullOrBlank()) {
+            com.bumptech.glide.Glide.with(this).load(recipe.imageUrl).into(ivImage)
+        }
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("Close", null)
+            .show()
     }
 
     private fun setupSearchView() {

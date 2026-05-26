@@ -9,19 +9,20 @@ import com.bumptech.glide.Glide
 import com.example.snapcal.data.model.Recipe
 import com.example.snapcal.databinding.ItemRecipeBinding
 
-class RecipeAdapter : ListAdapter<Recipe, RecipeAdapter.RecipeViewHolder>(RecipeDiffCallback()) {
+class RecipeAdapter(private val onItemClick: (Recipe) -> Unit) : ListAdapter<Recipe, RecipeAdapter.RecipeViewHolder>(RecipeDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
         val binding = ItemRecipeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return RecipeViewHolder(binding)
+        return RecipeViewHolder(binding, onItemClick)
     }
 
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class RecipeViewHolder(private val binding: ItemRecipeBinding) : RecyclerView.ViewHolder(binding.root) {
+    class RecipeViewHolder(private val binding: ItemRecipeBinding, private val onItemClick: (Recipe) -> Unit) : RecyclerView.ViewHolder(binding.root) {
         fun bind(recipe: Recipe) {
+            binding.root.setOnClickListener { onItemClick(recipe) }
             binding.tvRecipeTitle.text = recipe.title
             binding.tvRecipeCategory.text = buildString {
                 if (!recipe.category.isNullOrBlank()) append(recipe.category)
